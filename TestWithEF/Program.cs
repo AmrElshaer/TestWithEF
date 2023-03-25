@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Channels;
 using TestWithEF;
 using TestWithEF.Channels;

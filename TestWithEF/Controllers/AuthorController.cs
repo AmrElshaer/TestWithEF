@@ -10,7 +10,7 @@ using TestWithEF.Models;
 namespace TestWithEF.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
         private readonly TestContext context;
@@ -48,11 +48,17 @@ namespace TestWithEF.Controllers
                 Email = createAuthor.Postcode,
                 Name = createAuthor.Name
             });
-          
+            return Ok(author.Id);
+        }
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<Author>> GetUser(Guid id)
+        {
+            var author = await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            if (author == null) return NotFound();
             return Ok(author);
         }
-        [HttpPut]
-        public async Task<ActionResult> UpdateUser(UpdateAuthor updateAuthor)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult> UpdateUser(Guid id,UpdateAuthor updateAuthor)
         {
             var addressResult = Address.CreateAddress(updateAuthor.Street, updateAuthor.City, updateAuthor.Postcode, updateAuthor.Country);
             if (addressResult.IsFailure) return BadRequest(addressResult.Error);
@@ -60,7 +66,7 @@ namespace TestWithEF.Controllers
             var authorName = AuthorName.CreateAuthorName(updateAuthor.Name);
             var res = Result.Combine(authorName, contactDetailsResult);
             if (res.IsFailure) return BadRequest(res.Error);
-            var author = await context.Authors.FirstOrDefaultAsync(a=>a.Id==updateAuthor.Id);
+            var author = await context.Authors.FirstOrDefaultAsync(a=>a.Id==id);
             if (author == null) return NotFound();
             author= author.UpdateAuthor(authorName.Value,contactDetailsResult.Value);
             await context.SaveChangesAsync();
@@ -68,7 +74,7 @@ namespace TestWithEF.Controllers
             {
                 Name = author.Name
             });
-            return Ok(author);
+            return Ok(updateAuthor);
         }
     }
 }

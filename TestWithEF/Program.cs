@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
 using TestWithEF;
@@ -5,7 +6,7 @@ using TestWithEF.Channels;
 using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors();
 // Add services to the container.
 builder.Services.AddDbContext<TestContext>(options =>
       options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -36,7 +37,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors(builder =>
+    builder.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod());
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

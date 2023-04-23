@@ -5,7 +5,9 @@ using System.Collections;
 using System.Threading.Channels;
 using TestWithEF.Channels;
 using TestWithEF.Entities;
+using TestWithEF.IRepositories;
 using TestWithEF.Models;
+using TestWithEF.Specifications;
 
 namespace TestWithEF.Controllers
 {
@@ -13,22 +15,30 @@ namespace TestWithEF.Controllers
     [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
-        private readonly TestContext context;
+        private readonly IAuthorRepository _authorRepo;
         private readonly Channel<SendEmailChannel> sendEmailChannel;
         private readonly Channel<UserUpdatedChannel> userUpdateChannel;
 
-        public AuthorController(TestContext context,
+        public AuthorController(IAuthorRepository context,
             Channel<SendEmailChannel> sendEmailChannel,
             Channel<UserUpdatedChannel> userUpdateChannel)
         {
-            this.context = context;
+            this._authorRepo = context;
             this.sendEmailChannel = sendEmailChannel;
             this.userUpdateChannel = userUpdateChannel;
         }
         [HttpGet]
         public async Task<ActionResult> GetAuthors()
         {
-            var authors = await context.Authors.AsNoTracking().ToListAsync();
+            var authors = await _authorRepo.GetAllAsync();
+            return Ok(authors);
+        }
+        [HttpGet]
+        [Route("GetAuthorsByName")]
+        public async Task<ActionResult> GetAuthorsByName(string name)
+        {
+            var spec=new AuthorBySpecification(name);
+            var authors = await _authorRepo.GetAsync(spec);
             return Ok(authors);
         }
         [HttpPost]
@@ -41,8 +51,7 @@ namespace TestWithEF.Controllers
             var res= Result.Combine(authorName, contactDetailsResult);
             if (res.IsFailure) return BadRequest(res.Error);
             var author = Author.CreateAuthor(authorName.Value, contactDetailsResult.Value);
-            await context.Authors.AddAsync(author);
-            await context.SaveChangesAsync();
+            await _authorRepo.AddAsync(author);
             await  sendEmailChannel.Writer.WriteAsync(new SendEmailChannel
             {
                 Email = createAuthor.Postcode,
@@ -53,7 +62,7 @@ namespace TestWithEF.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<Author>> GetUser(Guid id)
         {
-            var author = await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            var author = await _authorRepo.GetByIdAsync(id);
             if (author == null) return NotFound();
             return Ok(author);
         }
@@ -66,10 +75,10 @@ namespace TestWithEF.Controllers
             var authorName = AuthorName.CreateAuthorName(updateAuthor.Name);
             var res = Result.Combine(authorName, contactDetailsResult);
             if (res.IsFailure) return BadRequest(res.Error);
-            var author = await context.Authors.FirstOrDefaultAsync(a=>a.Id==id);
+            var author = await _authorRepo.GetByIdAsync(id);
             if (author == null) return NotFound();
             author= author.UpdateAuthor(authorName.Value,contactDetailsResult.Value);
-            await context.SaveChangesAsync();
+            await _authorRepo.UpdateAsync(author);
             await userUpdateChannel.Writer.WriteAsync(new UserUpdatedChannel
             {
                 Name = author.Name

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
 using TestWithEF;
 using TestWithEF.Channels;
+using TestWithEF.IRepositories;
+using TestWithEF.IRepositories.Base;
 using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,11 @@ builder.Services.AddHostedService<UserUpdatedDispatcher>();
 builder.Services.AddSingleton(Channel.CreateUnbounded<UserUpdatedChannel>());
 builder.Services.AddSingleton(Channel.CreateUnbounded<SendEmailChannel>());
 builder.Services.AddScoped<IChannelService,ChannelService>();
+builder.Services.Scan(scan => scan
+    .FromCallingAssembly()
+    .AddClasses(classes => classes.AssignableTo(typeof(IRepository<,>)))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

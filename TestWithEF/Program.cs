@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
+using BuildingBlocks.Swagger;
 using TestWithEF;
 using TestWithEF.Channels;
-using TestWithEF.IRepositories;
+using TestWithEF.EndPoints;
 using TestWithEF.IRepositories.Base;
 using TestWithEF.Services;
 
@@ -34,9 +34,14 @@ builder.Services.Scan(scan => scan
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddCustomSwagger(builder.Configuration, typeof(TestWithEFRoot).Assembly);
+builder.Services.AddCustomVersioning();
+builder.AddMinimalEndpoints(assemblies: typeof(TestWithEFRoot).Assembly);
+
 
 var app = builder.Build();
+
+app.MapMinimalEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

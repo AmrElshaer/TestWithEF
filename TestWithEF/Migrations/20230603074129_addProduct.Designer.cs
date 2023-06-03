@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TestWithEF;
 
@@ -11,9 +12,11 @@ using TestWithEF;
 namespace TestWithEF.Migrations
 {
     [DbContext(typeof(TestContext))]
-    partial class TestContextModelSnapshot : ModelSnapshot
+    [Migration("20230603074129_addProduct")]
+    partial class addProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,14 +78,14 @@ namespace TestWithEF.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<byte>("ProductType")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("ProductType")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Product");
 
-                    b.HasDiscriminator<byte>("ProductType");
+                    b.HasDiscriminator<int>("ProductType");
 
                     b.UseTphMappingStrategy();
                 });
@@ -97,14 +100,14 @@ namespace TestWithEF.Migrations
                     b.Property<DateTimeOffset>("Start")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasDiscriminator().HasValue((byte)2);
+                    b.HasDiscriminator().HasValue(1);
                 });
 
             modelBuilder.Entity("TestWithEF.Entities.StandardProduct", b =>
                 {
                     b.HasBaseType("TestWithEF.Entities.Product");
 
-                    b.HasDiscriminator().HasValue((byte)1);
+                    b.HasDiscriminator().HasValue(0);
                 });
 
             modelBuilder.Entity("TestWithEF.Entities.Author", b =>

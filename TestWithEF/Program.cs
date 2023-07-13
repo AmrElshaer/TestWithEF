@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
 using BuildingBlocks.Swagger;
+using EntityFramework.Exceptions.SqlServer;
 using TestWithEF;
 using TestWithEF.Channels;
 using TestWithEF.EndPoints;
@@ -11,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 // Add services to the container.
 builder.Services.AddDbContext<TestContext>(options =>
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseExceptionProcessor();
+});
 builder.Services.AddHttpClient("CountriesClient", config =>
 {
     config.BaseAddress = new Uri("https://api.first.org/data/v1/");

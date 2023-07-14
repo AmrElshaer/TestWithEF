@@ -12,8 +12,8 @@ using TestWithEF;
 namespace TestWithEF.Migrations
 {
     [DbContext(typeof(TestContext))]
-    [Migration("20230713203445_UpdateAuthorConfiguration")]
-    partial class UpdateAuthorConfiguration
+    [Migration("20230714162923_Update-Author")]
+    partial class UpdateAuthor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

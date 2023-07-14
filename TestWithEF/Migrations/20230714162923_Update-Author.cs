@@ -5,7 +5,7 @@
 namespace TestWithEF.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateAuthorConfiguration : Migration
+    public partial class UpdateAuthor : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

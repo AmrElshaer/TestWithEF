@@ -3,9 +3,7 @@ using TestWithEF.Entities;
 
 namespace TestWithEF.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class OrderController : ControllerBase
+    public class OrderController : ApiControllerBase
     {
         private readonly TestContext _context;
 
@@ -19,13 +17,10 @@ namespace TestWithEF.Controllers
         {
             try
             {
-               
-
                 return _context.Orders.ToList();
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -36,6 +31,7 @@ namespace TestWithEF.Controllers
             try
             {
                 var order = _context.Orders.Find(id);
+
                 if (order == null)
                 {
                     return NotFound();
@@ -58,6 +54,7 @@ namespace TestWithEF.Controllers
             try
             {
                 var order = _context.Orders.Find(id);
+
                 if (order == null)
                 {
                     return NotFound();
@@ -80,6 +77,7 @@ namespace TestWithEF.Controllers
             try
             {
                 var order = _context.Orders.Find(id);
+
                 if (order == null)
                 {
                     return NotFound();
@@ -95,6 +93,7 @@ namespace TestWithEF.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpPost]
         public IActionResult Post([FromBody] Order order)
         {
@@ -109,7 +108,10 @@ namespace TestWithEF.Controllers
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
+            return CreatedAtAction(nameof(Get), new
+            {
+                id = order.Id
+            }, order);
         }
     }
 }

@@ -1,6 +1,7 @@
-﻿
+﻿using EntityFramework.Exceptions.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using TestWithEF.Exceptions;
 
 namespace TestWithEF.Filiters;
@@ -13,12 +14,50 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
     {
         // Register known exception types and handlers.
         _exceptionHandlers = new Dictionary<Type, Action<ExceptionContext>>
+        {
             {
-                { typeof(ValidationException), HandleValidationException },
-                { typeof(NotFoundException), HandleNotFoundException },
-                { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
-                { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
-            };
+                typeof(ValidationException), HandleValidationException
+            },
+            {
+                typeof(NotFoundException), HandleNotFoundException
+            },
+            {
+                typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException
+            },
+            {
+                typeof(ForbiddenAccessException), HandleForbiddenAccessException
+            },
+            {
+                typeof(UniqueConstraintException), HandleDbUpdateException
+            },
+            {
+                typeof(CannotInsertNullException), HandleDbUpdateException
+            },
+            {
+                typeof(NumericOverflowException), HandleDbUpdateException
+            },
+            {
+                typeof(ReferenceConstraintException), HandleDbUpdateException
+            },
+            {
+                typeof(MaxLengthExceededException), HandleDbUpdateException
+            },
+        };
+    }
+
+    private void HandleDbUpdateException(ExceptionContext obj)
+    {
+        var exception = (DbUpdateException) obj.Exception;
+
+        var details = new ProblemDetails()
+        {
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            Title = exception.Message
+        };
+
+        obj.Result = new BadRequestObjectResult(details);
+
+        obj.ExceptionHandled = true;
     }
 
     public override void OnException(ExceptionContext context)
@@ -30,23 +69,26 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
 
     private void HandleException(ExceptionContext context)
     {
-        Type type = context.Exception.GetType();
+        var type = context.Exception.GetType();
+
         if (_exceptionHandlers.ContainsKey(type))
         {
             _exceptionHandlers[type].Invoke(context);
+
             return;
         }
 
         if (!context.ModelState.IsValid)
         {
             HandleInvalidModelStateException(context);
+
             return;
         }
     }
 
     private void HandleValidationException(ExceptionContext context)
     {
-        var exception = (ValidationException)context.Exception;
+        var exception = (ValidationException) context.Exception;
 
         var details = new ValidationProblemDetails(exception.Errors)
         {
@@ -72,7 +114,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
 
     private void HandleNotFoundException(ExceptionContext context)
     {
-        var exception = (NotFoundException)context.Exception;
+        var exception = (NotFoundException) context.Exception;
 
         var details = new ProblemDetails()
         {

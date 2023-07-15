@@ -9,9 +9,7 @@ using TestWithEF.Specifications;
 
 namespace TestWithEF.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthorController : ControllerBase
+    public class AuthorController : ApiControllerBase
     {
         private readonly IAuthorRepository _authorRepo;
         private readonly Channel<SendEmailChannel> sendEmailChannel;

@@ -14,23 +14,27 @@ namespace TestWithEF.Controllers
         private readonly IAuthorRepository _authorRepo;
         private readonly Channel<SendEmailChannel> sendEmailChannel;
         private readonly Channel<UserUpdatedChannel> userUpdateChannel;
+        private readonly ILogger<AuthorController> _logger;
 
         public AuthorController
         (
             IAuthorRepository context,
             Channel<SendEmailChannel> sendEmailChannel,
-            Channel<UserUpdatedChannel> userUpdateChannel
+            Channel<UserUpdatedChannel> userUpdateChannel,
+            ILogger<AuthorController> logger
         )
         {
             this._authorRepo = context;
             this.sendEmailChannel = sendEmailChannel;
             this.userUpdateChannel = userUpdateChannel;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetAuthors()
         {
             var authors = await _authorRepo.GetAllAsync();
+            _logger.LogInformation("Get all authors {0}", authors.Count());
 
             return Ok(authors);
         }
@@ -62,6 +66,7 @@ namespace TestWithEF.Controllers
 
             var author = Author.CreateAuthor(authorName.Value, contactDetailsResult.Value);
             await _authorRepo.AddAsync(author);
+            _logger.LogInformation("Create author Name :{@Author} ", author);
 
             await sendEmailChannel.Writer.WriteAsync(new SendEmailChannel
             {

@@ -4,6 +4,7 @@ using BuildingBlocks.Swagger;
 using EntityFramework.Exceptions.SqlServer;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TestWithEF;
 using TestWithEF.Channels;
 using TestWithEF.EndPoints;
@@ -12,6 +13,7 @@ using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 // Add services to the container.
 builder.Services.AddDbContext<TestContext>(options =>
@@ -51,7 +53,7 @@ builder.Services.AddCustomVersioning();
 builder.AddMinimalEndpoints(assemblies: typeof(TestWithEFRoot).Assembly);
 
 var app = builder.Build();
-
+app.UseSerilogRequestLogging();
 app.MapMinimalEndpoints();
 
 // Configure the HTTP request pipeline.

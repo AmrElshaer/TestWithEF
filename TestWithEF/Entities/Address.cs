@@ -35,5 +35,10 @@ namespace TestWithEF.Entities
         public string City { get; private set; }
         public string Postcode { get; private set; }
         public string Country { get; private set; }
+
+        public override string ToString()
+        {
+            return "Street: " + Street + " City: " + City + " Postcode: " + Postcode + " Country: " + Country + " ";
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace TestWithEF.Services
                 if (msg != null)
                 {
                     await Task.Delay(2000);
-                    logger.LogInformation($"Send Email to {msg.Email} that name is {msg.Name}");
+                    logger.LogInformation("Send Email to {MsgEmail} that name is {MsgName}", msg.Email, msg.Name);
                 }
               
             }

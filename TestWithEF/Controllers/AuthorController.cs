@@ -34,7 +34,8 @@ namespace TestWithEF.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAuthors()
         {
-            var authors = (await _authorRepo.GetAllAsync()).Select(a=>{AuthorDto authorDto = a; return authorDto;});
+            var authors = (await _authorRepo.GetAllAsync()).Select(a => (AuthorDto) a);
+
             _logger.LogInformation("Get all authors {0}", authors.Count());
 
             return Ok(authors);

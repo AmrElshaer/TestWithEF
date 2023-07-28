@@ -14,35 +14,12 @@ using TestWithEF.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
-// Use to force loading of appsettings.json of test project
-builder.Configuration.AddJsonFile("appsettings.test.json",true);
-var configuration = builder.Configuration;
-// Add services to the container.
-bool useOnlyInMemoryDatabase = false;
-if (configuration["UseOnlyInMemoryDatabase"] != null)
-{
-    useOnlyInMemoryDatabase = bool.Parse(configuration["UseOnlyInMemoryDatabase"]!);
-}
 
-if (useOnlyInMemoryDatabase)
+builder.Services.AddDbContext<TestContext>(options =>
 {
-    builder.Services.AddDbContext<TestContext>(c =>
-    {
-        c.UseInMemoryDatabase("TestWithEF");
-        c.UseExceptionProcessor();
-    });
-         
-    
-}
-else
-{
-    builder.Services.AddDbContext<TestContext>(options =>
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-        options.UseExceptionProcessor();
-    });
-}
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseExceptionProcessor();
+});
 
 builder.Services.AddHttpClient("CountriesClient", config =>
 {
@@ -97,4 +74,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
 public partial class Program { }

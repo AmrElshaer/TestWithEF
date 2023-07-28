@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWithEF", "TestWithEF\TestWithEF.csproj", "{B362B604-11D4-41E5-97A1-282092197C3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWithEf.IntegrationTest", "TestWithEf.IntegrationTest\TestWithEf.IntegrationTest.csproj", "{67158261-5C79-4CEA-8EFA-566A099DFAB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{420DC3DB-FE67-4C92-B603-F3211BC8B957}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{B362B604-11D4-41E5-97A1-282092197C3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B362B604-11D4-41E5-97A1-282092197C3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B362B604-11D4-41E5-97A1-282092197C3F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{67158261-5C79-4CEA-8EFA-566A099DFAB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{67158261-5C79-4CEA-8EFA-566A099DFAB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{67158261-5C79-4CEA-8EFA-566A099DFAB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{67158261-5C79-4CEA-8EFA-566A099DFAB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{420DC3DB-FE67-4C92-B603-F3211BC8B957}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{420DC3DB-FE67-4C92-B603-F3211BC8B957}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{420DC3DB-FE67-4C92-B603-F3211BC8B957}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{420DC3DB-FE67-4C92-B603-F3211BC8B957}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

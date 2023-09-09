@@ -2,22 +2,29 @@
 
 namespace TestWithEF.Dtos;
 
-public  record struct AuthorDto(Guid Id, string Name, string Phone, string Street, string City, string Postcode, string Country)
+public class AuthorDto : BaseDto<AuthorDto, Author>
 {
-    public static implicit operator AuthorDto(Author author)
+    public Guid Id { get; init; }
+
+    public string Name { get; init; }
+
+    public string Phone { get; init; }
+
+    public string Street { get; init; }
+
+    public string City { get; init; }
+
+    public string Postcode { get; init; }
+
+    public string Country { get; init; }
+
+    public override void AddCustomMappings()
     {
-        return new ()
-        {
-            Id = author.Id,
-            Name = author.Name,
-            Phone = author.ContactDetails.Phone,
-            Street = author.ContactDetails.Address.Street,
-            City = author.ContactDetails.Address.City,
-            Postcode = author.ContactDetails.Address.Postcode,
-            Country = author.ContactDetails.Address.Country
-            
-        };
+        SetCustomMappingsInverse()
+            .Map(des => des.Phone, src => src.ContactDetails.Phone)
+            .Map(des => des.Street, src => src.ContactDetails.Address.Street)
+            .Map(des => des.Postcode, src => src.ContactDetails.Address.Postcode)
+            .Map(des => des.City, src => src.ContactDetails.Address.City)
+            .Map(des => des.Country, src => src.ContactDetails.Address.Country);
     }
 }
-
-

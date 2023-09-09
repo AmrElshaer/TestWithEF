@@ -1,6 +1,8 @@
 ﻿using System.Threading.Channels;
 using CSharpFunctionalExtensions;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TestWithEF.Channels;
 using TestWithEF.Dtos;
 using TestWithEF.Entities;
@@ -12,30 +14,32 @@ namespace TestWithEF.Controllers
 {
     public class AuthorController : ApiControllerBase
     {
-        private readonly IAuthorRepository _authorRepo;
+        readonly IAuthorRepository authorRepository;
+        private readonly TestContext _context;
         private readonly Channel<SendEmailChannel> sendEmailChannel;
         private readonly Channel<UserUpdatedChannel> userUpdateChannel;
         private readonly ILogger<AuthorController> _logger;
 
         public AuthorController
         (
-            IAuthorRepository context,
+            TestContext context,
             Channel<SendEmailChannel> sendEmailChannel,
             Channel<UserUpdatedChannel> userUpdateChannel,
-            ILogger<AuthorController> logger
+            ILogger<AuthorController> logger,
+            IAuthorRepository authorRepository
         )
         {
-            this._authorRepo = context;
+            this._context = context;
             this.sendEmailChannel = sendEmailChannel;
             this.userUpdateChannel = userUpdateChannel;
             _logger = logger;
+            this.authorRepository = authorRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetAuthors()
         {
-            var authors = (await _authorRepo.GetAllAsync()).Select(a => (AuthorDto) a);
-
+            var authors = await _context.Authors.ProjectToType<AuthorDto>().ToListAsync();
             _logger.LogInformation("Get all authors {0}", authors.Count());
 
             return Ok(authors);
@@ -46,7 +50,7 @@ namespace TestWithEF.Controllers
         public async Task<ActionResult> GetAuthorsByName(string name)
         {
             var spec = new AuthorBySpecification(name);
-            var authors = await _authorRepo.GetAsync(spec);
+            var authors = await authorRepository.GetAsync(spec);
 
             return Ok(authors);
         }
@@ -67,7 +71,7 @@ namespace TestWithEF.Controllers
                 return BadRequest(res.Error);
 
             var author = Author.CreateAuthor(authorName.Value, contactDetailsResult.Value);
-            await _authorRepo.AddAsync(author);
+            await _context.AddAsync(author);
             _logger.LogInformation("Create author Name :{@Author} ", author);
 
             await sendEmailChannel.Writer.WriteAsync(new SendEmailChannel
@@ -82,7 +86,7 @@ namespace TestWithEF.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<Author>> GetUser(Guid id)
         {
-            var author = await _authorRepo.GetByIdAsync(id);
+            var author = await authorRepository.GetByIdAsync(id);
 
             if (author == null)
                 return NotFound();
@@ -105,13 +109,13 @@ namespace TestWithEF.Controllers
             if (res.IsFailure)
                 return BadRequest(res.Error);
 
-            var author = await _authorRepo.GetByIdAsync(id);
+            var author = await authorRepository.GetByIdAsync(id);
 
             if (author == null)
                 return NotFound();
 
             author = author.UpdateAuthor(authorName.Value, contactDetailsResult.Value);
-            await _authorRepo.UpdateAsync(author);
+            await authorRepository.UpdateAsync(author);
 
             await userUpdateChannel.Writer.WriteAsync(new UserUpdatedChannel
             {

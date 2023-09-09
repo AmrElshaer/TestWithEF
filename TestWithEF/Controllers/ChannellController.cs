@@ -29,28 +29,28 @@ namespace TestWithEF.Controllers
             await channel.Writer.WriteAsync("Hello");
             return true;
         }
-        //[HttpGet]
-        //public IActionResult Get()
-        //{
+        [HttpGet]
+        public IActionResult Get()
+        {
 
-        //    Task.Run(async () =>
-        //   {
-        //       using (var scope = provider.CreateScope())
-        //       {
-        //           var database = scope.ServiceProvider.GetRequiredService<TestContext>();
-        //           var user = await database.Authors.FirstOrDefaultAsync();
-        //           var client = httpClientFactory.CreateClient();
-        //           var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
-        //           var authorNameRes = AuthorName.CreateAuthorName(response);
-        //           if (authorNameRes.IsFailure) throw new ArgumentException(authorNameRes.Error);
-        //           user=user.UpdateName(authorNameRes.Value);
-        //           await database.SaveChangesAsync();
-        //          logger.LogInformation("Complete");
-        //       }
+            Task.Run(async () =>
+           {
+               using (var scope = provider.CreateScope())
+               {
+                   var database = scope.ServiceProvider.GetRequiredService<TestContext>();
+                   var user = await database.Authors.FirstOrDefaultAsync();
+                   var client = httpClientFactory.CreateClient();
+                   var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
+                   var authorNameRes = AuthorName.CreateAuthorName(response);
+                   if (authorNameRes.IsFailure) throw new ArgumentException(authorNameRes.Error);
+                   user=user.UpdateName(authorNameRes.Value);
+                   await database.SaveChangesAsync();
+                  logger.LogInformation("Complete");
+               }
               
-        //   });
+           });
 
-        //    return Ok();
-        //}
+            return Ok();
+        }
     }
 }

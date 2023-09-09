@@ -28,6 +28,8 @@ builder.Services.AddHttpClient("CountriesClient", config =>
     config.DefaultRequestHeaders.Clear();
 });
 
+// mapster configuration
+builder.Services.AddMapster();
 builder.Services.AddHttpClient();
 //builder.Services.AddHostedService<NotificationDispatcher>();
 builder.Services.AddHostedService<SendEmailDispatcher>();

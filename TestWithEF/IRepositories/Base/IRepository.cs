@@ -18,9 +18,9 @@ namespace TestWithEF.IRepositories.Base
                                         bool disableTracking = true);
         Task<IReadOnlyList<T>> GetAsync(ISpecification<T> spec);
         Task<T> GetByIdAsync(TId id);
-        Task<T> AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
+        Task AddAsync(T entity);
+        void Update(T entity);
+        void Delete(T entity);
         Task<int> CountAsync(ISpecification<T> spec);
     }
 }

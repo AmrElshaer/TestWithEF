@@ -14,7 +14,7 @@ namespace TestWithEF.Controllers
 {
     public class AuthorController : ApiControllerBase
     {
-        readonly IAuthorRepository authorRepository;
+        private readonly IAuthorRepository authorRepository;
         private readonly TestContext _context;
         private readonly Channel<SendEmailChannel> sendEmailChannel;
         private readonly Channel<UserUpdatedChannel> userUpdateChannel;
@@ -72,6 +72,7 @@ namespace TestWithEF.Controllers
 
             var author = Author.CreateAuthor(authorName.Value, contactDetailsResult.Value);
             await _context.AddAsync(author);
+            await _context.SaveChangesAsync();
             _logger.LogInformation("Create author Name :{@Author} ", author);
 
             await sendEmailChannel.Writer.WriteAsync(new SendEmailChannel
@@ -97,6 +98,7 @@ namespace TestWithEF.Controllers
         [HttpPut("{id:guid}")]
         public async Task<ActionResult> UpdateUser(Guid id, UpdateAuthor updateAuthor)
         {
+           
             var addressResult = Address.CreateAddress(updateAuthor.Street, updateAuthor.City, updateAuthor.Postcode, updateAuthor.Country);
 
             if (addressResult.IsFailure)
@@ -115,7 +117,8 @@ namespace TestWithEF.Controllers
                 return NotFound();
 
             author = author.UpdateAuthor(authorName.Value, contactDetailsResult.Value);
-            await authorRepository.UpdateAsync(author);
+            authorRepository.Update(author);
+            await _context.SaveChangesAsync();
 
             await userUpdateChannel.Writer.WriteAsync(new UserUpdatedChannel
             {

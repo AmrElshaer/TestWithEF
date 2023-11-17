@@ -1,7 +1,8 @@
-﻿using TestWithEF.IRepositories;
+﻿using TestWithEF.Entities;
+using TestWithEF.IRepositories;
 using TestWithEF.Models;
-using TestWithEF.Entities;
-namespace TestWithEF.EndPoints.Product;
+
+namespace TestWithEF.EndPoints.Product.CreateProduct;
 
 public class CreateProductEndPoint : IMinimalEndpoint
 {

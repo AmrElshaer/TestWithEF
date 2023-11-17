@@ -1,6 +1,6 @@
 ﻿using TestWithEF.Entities;
 
-namespace TestWithEF.Models;
+namespace TestWithEF.EndPoints.Product.CreateProduct;
 
 public class CreateProductVM
 {

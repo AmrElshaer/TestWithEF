@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using TestWithEF;
 using TestWithEF.Channels;
 using TestWithEF.EndPoints;
 using TestWithEF.Identity;
 using TestWithEF.IRepositories.Base;
+using TestWithEF.Models;
 using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,22 +23,29 @@ builder.Services.AddCors();
 builder.Services.AddDbContext<TestContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-        options.LogTo(s => Console.WriteLine(s),LogLevel.Information)
+
+    options.LogTo(s => Console.WriteLine(s), LogLevel.Information)
         .EnableDetailedErrors()
         .EnableSensitiveDataLogging();
+
     options.UseExceptionProcessor();
 });
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    options.LogTo(s => Console.WriteLine(s),LogLevel.Information)
+
+    options.LogTo(s => Console.WriteLine(s), LogLevel.Information)
         .EnableDetailedErrors()
         .EnableSensitiveDataLogging();
+
     options.UseExceptionProcessor();
 });
+
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,6 +58,7 @@ builder.Services.AddAuthentication(options =>
     {
         options.SaveToken = true;
         options.RequireHttpsMetadata = false;
+
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,
@@ -78,6 +86,7 @@ builder.Services.AddHostedService<UserUpdatedDispatcher>();
 builder.Services.AddSingleton(Channel.CreateUnbounded<UserUpdatedChannel>());
 builder.Services.AddSingleton(Channel.CreateUnbounded<SendEmailChannel>());
 builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.ConfigureOptions<JwtOptionsSetup>();
 
 builder.Services.Scan(scan => scan
     .FromCallingAssembly()

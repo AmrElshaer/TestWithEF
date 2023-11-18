@@ -10,6 +10,7 @@ using TestWithEF.Entities;
 using TestWithEF.IRepositories;
 using TestWithEF.Models;
 using TestWithEF.Specifications;
+using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Controllers
 {
@@ -100,7 +101,6 @@ namespace TestWithEF.Controllers
         [HttpPut("{id:guid}")]
         public async Task<ActionResult> UpdateUser(Guid id, UpdateAuthor updateAuthor)
         {
-           
             var addressResult = Address.CreateAddress(updateAuthor.Street, updateAuthor.City, updateAuthor.Postcode, updateAuthor.Country);
 
             if (addressResult.IsFailure)

@@ -1,7 +1,6 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
 using Microsoft.EntityFrameworkCore;
-using TestWithEF.Entities;
+using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Services
 {
@@ -12,11 +11,13 @@ namespace TestWithEF.Services
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IServiceProvider provider;
 
-        public NotificationDispatcher(
+        public NotificationDispatcher
+        (
             Channel<string> channel,
             ILogger<NotificationDispatcher> logger,
             IHttpClientFactory httpClientFactory,
-            IServiceProvider provider)
+            IServiceProvider provider
+        )
         {
             this.channel = channel;
             this.logger = logger;
@@ -30,6 +31,7 @@ namespace TestWithEF.Services
             {
                 // read from channel
                 var msg = await channel.Reader.ReadAsync();
+
                 try
                 {
                     using (var scope = provider.CreateScope())
@@ -39,7 +41,10 @@ namespace TestWithEF.Services
                         var client = httpClientFactory.CreateClient();
                         var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
                         var authorNameRes = AuthorName.CreateAuthorName(response);
-                        if (authorNameRes.IsFailure) throw new ArgumentException(authorNameRes.Error);
+
+                        if (authorNameRes.IsFailure)
+                            throw new ArgumentException(authorNameRes.Error);
+
                         user = user.UpdateName(authorNameRes.Value);
                         await database.SaveChangesAsync();
                         logger.LogInformation("Complete");

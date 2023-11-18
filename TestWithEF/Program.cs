@@ -13,11 +13,14 @@ using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
-builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+//builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddDbContext<TestContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.LogTo(s => Console.WriteLine(s),LogLevel.Information)
+        .EnableDetailedErrors()
+        .EnableSensitiveDataLogging();
     options.UseExceptionProcessor();
 });
 
@@ -54,7 +57,7 @@ builder.Services.AddCustomVersioning();
 builder.AddMinimalEndpoints(assemblies: typeof(TestWithEFRoot).Assembly);
 
 var app = builder.Build();
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 app.MapMinimalEndpoints();
 
 // Configure the HTTP request pipeline.

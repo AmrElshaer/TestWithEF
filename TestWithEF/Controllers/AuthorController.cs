@@ -1,6 +1,7 @@
 ﻿using System.Threading.Channels;
 using CSharpFunctionalExtensions;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestWithEF.Channels;
@@ -36,6 +37,7 @@ namespace TestWithEF.Controllers
             this.authorRepository = authorRepository;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> GetAuthors()
         {

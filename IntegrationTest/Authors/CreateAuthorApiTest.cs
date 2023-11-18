@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text;
+using IntegrationTest.TestData;
 using Newtonsoft.Json;
 using TestWithEF.Extensions;
-using TestWithEF.Models;
 
 namespace IntegrationTest.Authors;
 
@@ -12,15 +12,8 @@ public class CreateAuthorApiTest : BaseTestFixture
     public async Task CreateAuthor_SuccessOK()
     {
         // Arrange
-        var createAuthor = new CreateAuthor
-        {
-            Name = "Test Author",
-            Street = "Test Street",
-            City = "Test City",
-            Postcode = "Test Postcode",
-            Country = "Test Country",
-            Phone = "Test Phone"
-        };
+        var createAuthor =DataGenerator.CreateAuthorRequest()
+            .Generate();
 
         var jsonContent = JsonConvert.SerializeObject(createAuthor);
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");

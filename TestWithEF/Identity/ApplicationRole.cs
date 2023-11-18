@@ -2,4 +2,15 @@
 
 namespace TestWithEF.Identity;
 
-public class ApplicationRole : IdentityRole<Guid> { }
+public class ApplicationRole : IdentityRole<Guid>
+{
+    private ApplicationRole()
+    : base()
+    {
+        
+    }
+    public ApplicationRole(string roleName) : base(roleName)
+    {
+        
+    }
+}

@@ -11,7 +11,7 @@ using TestWithEF;
 
 namespace TestWithEF.Migrations
 {
-    [DbContext(typeof(TestContext))]
+    [DbContext(typeof(TestDbContext))]
     [Migration("20230308130547_initpo")]
     partial class initpo
     {

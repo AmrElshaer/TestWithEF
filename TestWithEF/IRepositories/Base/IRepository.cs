@@ -1,21 +1,32 @@
-﻿using CSharpFunctionalExtensions;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using TestWithEF.Base;
+using TestWithEF.Entities;
 
 namespace TestWithEF.IRepositories.Base
 {
-    public interface IRepository<T,TId> where T : Entity<TId>
+    public interface IRepository<T, TId>
+        where T : Entity<TId>
+        where TId : IComparable<TId>
     {
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null,
-                                        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-                                        string includeString = null,
-                                        bool disableTracking = true);
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null,
-                                        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-                                        List<Expression<Func<T, object>>> includes = null,
-                                        bool disableTracking = true);
+
+        Task<IReadOnlyList<T>> GetAsync
+        (
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeString = null,
+            bool disableTracking = true
+        );
+
+        Task<IReadOnlyList<T>> GetAsync
+        (
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            List<Expression<Func<T, object>>> includes = null,
+            bool disableTracking = true
+        );
+
         Task<IReadOnlyList<T>> GetAsync(ISpecification<T> spec);
         Task<T> GetByIdAsync(TId id);
         Task AddAsync(T entity);

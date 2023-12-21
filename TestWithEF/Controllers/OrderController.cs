@@ -5,11 +5,11 @@ namespace TestWithEF.Controllers
 {
     public class OrderController : ApiControllerBase
     {
-        private readonly TestContext _context;
+        private readonly TestDbContext _dbContext;
 
-        public OrderController(TestContext context)
+        public OrderController(TestDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
@@ -17,7 +17,7 @@ namespace TestWithEF.Controllers
         {
             try
             {
-                return _context.Orders.ToList();
+                return _dbContext.Orders.ToList();
             }
             catch (Exception ex)
             {
@@ -30,7 +30,7 @@ namespace TestWithEF.Controllers
         {
             try
             {
-                var order = _context.Orders.Find(id);
+                var order = _dbContext.Orders.Find(id);
 
                 if (order == null)
                 {
@@ -38,7 +38,7 @@ namespace TestWithEF.Controllers
                 }
 
                 order.State.Confirm(order);
-                _context.SaveChanges();
+                _dbContext.SaveChanges();
 
                 return Ok(order);
             }
@@ -53,7 +53,7 @@ namespace TestWithEF.Controllers
         {
             try
             {
-                var order = _context.Orders.Find(id);
+                var order = _dbContext.Orders.Find(id);
 
                 if (order == null)
                 {
@@ -61,7 +61,7 @@ namespace TestWithEF.Controllers
                 }
 
                 order.State.Process(order);
-                _context.SaveChanges();
+                _dbContext.SaveChanges();
 
                 return Ok(order);
             }
@@ -76,7 +76,7 @@ namespace TestWithEF.Controllers
         {
             try
             {
-                var order = _context.Orders.Find(id);
+                var order = _dbContext.Orders.Find(id);
 
                 if (order == null)
                 {
@@ -84,7 +84,7 @@ namespace TestWithEF.Controllers
                 }
 
                 order.State.Cancel(order);
-                _context.SaveChanges();
+                _dbContext.SaveChanges();
 
                 return Ok(order);
             }
@@ -105,8 +105,8 @@ namespace TestWithEF.Controllers
             order.State = new DraftState();
             order.CreatedAt = DateTime.UtcNow;
 
-            _context.Orders.Add(order);
-            _context.SaveChanges();
+            _dbContext.Orders.Add(order);
+            _dbContext.SaveChanges();
 
             return CreatedAtAction(nameof(Get), new
             {

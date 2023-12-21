@@ -1,5 +1,5 @@
-﻿using CSharpFunctionalExtensions;
-using TestWithEF.Entities;
+﻿using TestWithEF.Entities;
+using TestWithEF.Models;
 
 namespace TestWithEF.ValueObjects
 {
@@ -9,17 +9,14 @@ namespace TestWithEF.ValueObjects
 
         public static Result<ContactDetails> CreateContactDetails(string phone, Address address)
         {
-            if (string.IsNullOrEmpty(phone))
-                return Result.Failure<ContactDetails>("phone number is empty");
-
-            return new ContactDetails()
+            return phone.NotEmpty().Map(p => new ContactDetails()
             {
                 Phone = phone,
                 Address = address
-            };
+            });
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return Phone;
             yield return Address;

@@ -2,7 +2,6 @@
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using TestContext = TestWithEF.TestContext;
 
 namespace IntegrationTest.DatabasesTestingProvider;
 
@@ -26,11 +25,11 @@ public class SqliteTestDatabase : ITestDatabase
 
         await _connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<TestContext>()
+        var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseSqlite(_connection)
             .Options;
 
-        var context = new TestContext(options);
+        var context = new ApplicationContext(options);
 
         try
         {

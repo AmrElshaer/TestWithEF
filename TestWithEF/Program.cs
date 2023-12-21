@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 //builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddDbContext<TestContext>(options =>
+builder.Services.AddDbContext<TestDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
@@ -30,6 +30,9 @@ builder.Services.AddDbContext<TestContext>(options =>
 
     options.UseExceptionProcessor();
 });
+
+// add mediatr
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

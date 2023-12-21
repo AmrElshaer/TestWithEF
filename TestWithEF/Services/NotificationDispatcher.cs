@@ -1,6 +1,4 @@
 ﻿using System.Threading.Channels;
-using Microsoft.EntityFrameworkCore;
-using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Services
 {
@@ -34,21 +32,21 @@ namespace TestWithEF.Services
 
                 try
                 {
-                    using (var scope = provider.CreateScope())
-                    {
-                        var database = scope.ServiceProvider.GetRequiredService<TestContext>();
-                        var user = await database.Authors.FirstOrDefaultAsync();
-                        var client = httpClientFactory.CreateClient();
-                        var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
-                        var authorNameRes = AuthorName.CreateAuthorName(response);
-
-                        if (authorNameRes.IsFailure)
-                            throw new ArgumentException(authorNameRes.Error);
-
-                        user = user.UpdateName(authorNameRes.Value);
-                        await database.SaveChangesAsync();
-                        logger.LogInformation("Complete");
-                    }
+                    // using (var scope = provider.CreateScope())
+                    // {
+                    //     var database = scope.ServiceProvider.GetRequiredService<TestContext>();
+                    //     var user = await database.Authors.FirstOrDefaultAsync();
+                    //     var client = httpClientFactory.CreateClient();
+                    //     var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
+                    //     var authorNameRes = AuthorName.CreateAuthorName(response);
+                    //
+                    //     if (authorNameRes.IsFailure)
+                    //         throw new ArgumentException(authorNameRes.Error);
+                    //
+                    //     user = user.UpdateName(authorNameRes.Value);
+                    //     await database.SaveChangesAsync();
+                    //     logger.LogInformation("Complete");
+                    // }
                 }
                 catch (Exception e)
                 {

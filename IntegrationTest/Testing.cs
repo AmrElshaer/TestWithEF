@@ -1,12 +1,11 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using IntegrationTest.DatabasesTestingProvider;
-using IntegrationTest.TestData;
-using Newtonsoft.Json;
-using TestWithEF.Controllers;
-using TestWithEF.Extensions;
-using TestWithEF.Models;
-
+﻿using IntegrationTest.DatabasesTestingProvider;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using TestWithEF.Identity;
+using TestWithEF.ValueObjects;
+using TestApplicationDbContext= TestWithEF.TestDbContext;
 namespace IntegrationTest;
 
 [SetUpFixture]
@@ -14,38 +13,79 @@ public partial class Testing
 {
     private static ITestDatabase _database = null!;
     private static CustomWebApplicationFactory _factory = null!;
-
-    public static HttpClient Client = default!;
+    private static IServiceScopeFactory _scopeFactory = null!;
+    private static Guid? _userId;
 
     [OneTimeSetUp]
     public async Task RunBeforeAnyTests()
     {
         _database = await TestDatabaseFactory.CreateAsync();
         _factory = new CustomWebApplicationFactory(_database.GetConnection());
-        Client = _factory.CreateClient();
-        var loginResponse = await AddUser();
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse!.Token);
+        _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
     }
 
-    private static async Task<LoginResponse?> AddUser()
+    public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
-        var registerUser = DataGenerator.RegisterUserRequest().Generate();
-        var registerUserJsonContent = JsonConvert.SerializeObject(registerUser);
-        var httpContent = new StringContent(registerUserJsonContent, Encoding.UTF8, "application/json");
-        _ = await Client.PostAsync("/api/user/register", httpContent);
+        using var scope = _scopeFactory.CreateScope();
 
-        var loginUser = JsonConvert.SerializeObject(new LoginModel
+        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
+
+        return await mediator.Send(request);
+    }
+
+    public static async Task SendAsync(IBaseRequest request)
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
+
+        await mediator.Send(request);
+    }
+
+    public static Guid? GetUserId()
+    {
+        return _userId;
+    }
+
+    private static async Task<Guid> AddUser(string userName, string password, string[] roles)
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var emailResult = Email.CreateEmail(userName);
+
+        if (emailResult.Failure)
         {
-            Username = registerUser.Username,
-            Password = registerUser.Password
-        });
+            throw emailResult.Error;
+        }
 
-        var loginContent = new StringContent(loginUser, Encoding.UTF8, "application/json");
-        var token = await Client.PostAsync("/api/user/login", loginContent);
-        var tokenString = await token.Content.ReadAsStringAsync();
-        var loginResponse = tokenString.FromJson<LoginResponse>();
+        var userResult = ApplicationUser.Create(emailResult.Value);
 
-        return loginResponse;
+        if (userResult.Failure)
+        {
+            throw userResult.Error;
+        }
+
+        var result = await userManager.CreateAsync(userResult.Value, password);
+
+        if (roles.Any())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            foreach (var role in roles)
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            await userManager.AddToRolesAsync(userResult.Value, roles);
+        }
+
+        if (!result.Succeeded)
+            throw new Exception($"Unable to create {userName}");
+
+        _userId = userResult.Value.Id;
+
+        return _userId.Value;
     }
 
     // before any test method
@@ -56,6 +96,49 @@ public partial class Testing
             await _database.ResetAsync();
         }
         catch (Exception) { }
+
+        _userId = null;
+    }
+
+    public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
+        where TEntity : class
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<TestApplicationDbContext>();
+
+        return await context.FindAsync<TEntity>(keyValues);
+    }
+
+    public static async Task AddAsync<TEntity>(TEntity entity)
+        where TEntity : class
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<TestApplicationDbContext>();
+
+        context.Add(entity);
+
+        await context.SaveChangesAsync();
+    }
+    public static async Task AddRangeAsync<TEntity>(List<TEntity> entity)
+        where TEntity : class
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<TestApplicationDbContext>();
+
+        context.AddRange(entity);
+
+        await context.SaveChangesAsync();
+    }
+    public static async Task<int> CountAsync<TEntity>() where TEntity : class
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<TestApplicationDbContext>();
+
+        return await context.Set<TEntity>().CountAsync();
     }
 
     [OneTimeTearDown]
@@ -63,6 +146,5 @@ public partial class Testing
     {
         await _database.DisposeAsync();
         await _factory.DisposeAsync();
-        Client.Dispose();
     }
 }

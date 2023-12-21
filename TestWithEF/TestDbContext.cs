@@ -4,13 +4,13 @@ using TestWithEF.Entities;
 
 namespace TestWithEF
 {
-    public class TestContext : DbContext
+    public class TestDbContext : DbContext
     {
         public DbSet<Author> Authors { get; set; }
 
         public DbSet<Order> Orders { get; set; }
 
-        public TestContext(DbContextOptions<TestContext> options)
+        public TestDbContext(DbContextOptions<TestDbContext> options)
             : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

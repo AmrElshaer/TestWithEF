@@ -1,23 +1,25 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using TestWithEF.Base;
+using TestWithEF.Entities;
 using TestWithEF.IRepositories.Base;
 
 namespace TestWithEF.Repository.Base
 {
-    public class Repository<T,TId> : IRepository<T,TId> where T : Entity<TId>
+    public class Repository<T, TId> : IRepository<T, TId>
+        where T : Entity<TId>
+        where TId : IComparable<TId>
     {
-        protected readonly TestContext _dbContext;
+        protected readonly TestDbContext DbDbContext;
 
-        public Repository(TestContext dbContext)
+        public Repository(TestDbContext dbDbContext)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            DbDbContext = dbDbContext ?? throw new ArgumentNullException(nameof(dbDbContext));
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await DbDbContext.Set<T>().ToListAsync();
         }
 
         public async Task<IReadOnlyList<T>> GetAsync(ISpecification<T> spec)
@@ -32,60 +34,77 @@ namespace TestWithEF.Repository.Base
 
         private IQueryable<T> ApplySpecification(ISpecification<T> spec)
         {
-            return SpecificationEvaluator<T,TId>.GetQuery(_dbContext.Set<T>().AsQueryable(), spec);
+            return SpecificationEvaluator<T, TId>.GetQuery(DbDbContext.Set<T>().AsQueryable(), spec);
         }
 
         public async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+            return await DbDbContext.Set<T>().Where(predicate).ToListAsync();
         }
 
-        public async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeString = null, bool disableTracking = true)
+        public async Task<IReadOnlyList<T>> GetAsync
+            (Expression<Func<T, bool>> predicate = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeString = null, bool disableTracking = true)
         {
-            IQueryable<T> query = _dbContext.Set<T>();
-            if (disableTracking) query = query.AsNoTracking();
+            IQueryable<T> query = DbDbContext.Set<T>();
 
-            if (!string.IsNullOrWhiteSpace(includeString)) query = query.Include(includeString);
+            if (disableTracking)
+                query = query.AsNoTracking();
 
-            if (predicate != null) query = query.Where(predicate);
+            if (!string.IsNullOrWhiteSpace(includeString))
+                query = query.Include(includeString);
+
+            if (predicate != null)
+                query = query.Where(predicate);
 
             if (orderBy != null)
                 return await orderBy(query).ToListAsync();
+
             return await query.ToListAsync();
         }
 
-        public async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, List<Expression<Func<T, object>>> includes = null, bool disableTracking = true)
+        public async Task<IReadOnlyList<T>> GetAsync
+        (
+            Expression<Func<T, bool>> predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            List<Expression<Func<T, object>>> includes = null,
+            bool disableTracking = true
+        )
         {
-            IQueryable<T> query = _dbContext.Set<T>();
-            if (disableTracking) query = query.AsNoTracking();
+            IQueryable<T> query = DbDbContext.Set<T>();
 
-            if (includes != null) query = includes.Aggregate(query, (current, include) => current.Include(include));
+            if (disableTracking)
+                query = query.AsNoTracking();
 
-            if (predicate != null) query = query.Where(predicate);
+            if (includes != null)
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+
+            if (predicate != null)
+                query = query.Where(predicate);
 
             if (orderBy != null)
                 return await orderBy(query).ToListAsync();
+
             return await query.ToListAsync();
         }
 
         public virtual async Task<T> GetByIdAsync(TId id)
         {
-            return await _dbContext.Set<T>().FindAsync(id);
+            return await DbDbContext.Set<T>().FindAsync(id);
         }
 
         public async Task AddAsync(T entity)
         {
-            await _dbContext.Set<T>().AddAsync(entity);
+            await DbDbContext.Set<T>().AddAsync(entity);
         }
 
-        public  void Update(T entity)
+        public void Update(T entity)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            DbDbContext.Entry(entity).State = EntityState.Modified;
         }
 
-        public  void Delete(T entity)
+        public void Delete(T entity)
         {
-            _dbContext.Set<T>().Remove(entity);
+            DbDbContext.Set<T>().Remove(entity);
         }
     }
 }

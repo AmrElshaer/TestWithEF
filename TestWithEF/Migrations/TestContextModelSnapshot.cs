@@ -10,7 +10,7 @@ using TestWithEF;
 
 namespace TestWithEF.Migrations
 {
-    [DbContext(typeof(TestContext))]
+    [DbContext(typeof(TestDbContext))]
     partial class TestContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

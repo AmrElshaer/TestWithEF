@@ -11,7 +11,7 @@ using TestWithEF;
 
 namespace TestWithEF.Migrations
 {
-    [DbContext(typeof(TestContext))]
+    [DbContext(typeof(TestDbContext))]
     [Migration("20230714162923_Update-Author")]
     partial class UpdateAuthor
     {

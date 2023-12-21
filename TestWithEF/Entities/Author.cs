@@ -1,9 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using TestWithEF.ValueObjects;
+﻿using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Entities
 {
-    public class Author : Entity<Guid>
+    public class Author : Entity
     {
         // To prevent user from create instance using new Author()
         private Author() { }

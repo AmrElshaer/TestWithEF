@@ -92,14 +92,19 @@ public class UserController : ApiControllerBase
 
         var emailResult = Email.CreateEmail(model.Email);
 
-        if (emailResult.IsFailure)
+        if (emailResult.Failure)
         {
             return BadRequest(emailResult.Error);
         }
 
         var user = ApplicationUser.Create(emailResult.Value);
 
-        var result = await _userManager.CreateAsync(user, model.Password);
+        if (user.Failure)
+        {
+            return BadRequest(user.Error);
+        }
+
+        var result = await _userManager.CreateAsync(user.Value, model.Password);
 
         if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response
@@ -130,14 +135,19 @@ public class UserController : ApiControllerBase
 
         var emailResult = Email.CreateEmail(model.Email);
 
-        if (emailResult.IsFailure)
+        if (emailResult.Failure)
         {
             return BadRequest(emailResult.Error);
         }
 
         var user = ApplicationUser.Create(emailResult.Value);
 
-        var result = await _userManager.CreateAsync(user, model.Password);
+        if (emailResult.Failure)
+        {
+            return BadRequest(emailResult.Error);
+        }
+
+        var result = await _userManager.CreateAsync(user.Value, model.Password);
 
         if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response
@@ -154,12 +164,12 @@ public class UserController : ApiControllerBase
 
         if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
         {
-            await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+            await _userManager.AddToRoleAsync(user.Value, UserRoles.Admin);
         }
 
         if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
         {
-            await _userManager.AddToRoleAsync(user, UserRoles.User);
+            await _userManager.AddToRoleAsync(user.Value, UserRoles.User);
         }
 
         return Ok(new Response

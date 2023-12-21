@@ -20,3 +20,11 @@ public class ValidationException : Exception
 
     public IDictionary<string, string[]> Errors { get; }
 }
+
+public class StringException : Exception
+{
+    public static Exception Empty(string name)
+    {
+        return new Exception($"{name} is empty");
+    }
+}

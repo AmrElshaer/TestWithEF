@@ -1,11 +1,12 @@
-﻿using CSharpFunctionalExtensions;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using TestWithEF.Base;
+using TestWithEF.Entities;
 
 namespace TestWithEF.Repository.Base
 {
-    public class SpecificationEvaluator<T,TId> where T : Entity<TId>
+    public class SpecificationEvaluator<T, TId>
+        where T : Entity<TId>
+        where TId : IComparable<TId>
     {
         public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> specification)
         {
@@ -19,11 +20,11 @@ namespace TestWithEF.Repository.Base
 
             // Includes all expression-based includes
             query = specification.Includes.Aggregate(query,
-                                    (current, include) => current.Include(include));
+                (current, include) => current.Include(include));
 
             // Include any string-based include statements
             query = specification.IncludeStrings.Aggregate(query,
-                                    (current, include) => current.Include(include));
+                (current, include) => current.Include(include));
 
             // Apply ordering if expressions are set
             if (specification.OrderBy != null)
@@ -39,8 +40,9 @@ namespace TestWithEF.Repository.Base
             if (specification.isPagingEnabled)
             {
                 query = query.Skip(specification.Skip)
-                             .Take(specification.Take);
+                    .Take(specification.Take);
             }
+
             return query;
         }
     }

@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using TestWithEF.Models;
 
 namespace TestWithEF.ValueObjects
 {
@@ -10,16 +10,13 @@ namespace TestWithEF.ValueObjects
 
         public static Result<AuthorName> CreateAuthorName(string name)
         {
-            if (string.IsNullOrEmpty(name))
-                return Result.Failure<AuthorName>("the author name is empty");
-
-            return Result.Success(new AuthorName()
+            return name.NotEmpty().Map(n => new AuthorName()
             {
-                Value = name
+                Value = n
             });
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return Value;
         }

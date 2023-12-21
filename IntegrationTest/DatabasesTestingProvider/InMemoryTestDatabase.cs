@@ -1,7 +1,6 @@
 ﻿using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using TestContext = TestWithEF.TestContext;
 
 namespace IntegrationTest.DatabasesTestingProvider;
 
@@ -16,11 +15,11 @@ public class InMemoryTestDatabase : ITestDatabase
 
     public async Task InitialiseAsync()
     {
-        var options = new DbContextOptionsBuilder<TestContext>()
+        var options = new DbContextOptionsBuilder<ApplicationContext>()
             .UseInMemoryDatabase(_connectionString)
             .Options;
 
-        var context = new TestContext(options);
+        var context = new ApplicationContext(options);
 
         await context.Database.EnsureCreatedAsync();
     }

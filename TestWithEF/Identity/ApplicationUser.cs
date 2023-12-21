@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using TestWithEF.Models;
 using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Identity;
@@ -7,7 +8,7 @@ public class ApplicationUser : IdentityUser<Guid>
 {
     private ApplicationUser() { }
 
-    public static ApplicationUser Create(Email email)
+    public static Result<ApplicationUser> Create(Email email)
     {
         var user = new ApplicationUser
         {

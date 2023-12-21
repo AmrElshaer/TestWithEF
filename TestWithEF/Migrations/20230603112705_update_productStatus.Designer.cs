@@ -11,7 +11,7 @@ using TestWithEF;
 
 namespace TestWithEF.Migrations
 {
-    [DbContext(typeof(TestContext))]
+    [DbContext(typeof(TestDbContext))]
     [Migration("20230603112705_update_productStatus")]
     partial class update_productStatus
     {

@@ -40,14 +40,14 @@ namespace TestWithEF.Controllers
             {
                 using (var scope = provider.CreateScope())
                 {
-                    var database = scope.ServiceProvider.GetRequiredService<TestContext>();
+                    var database = scope.ServiceProvider.GetRequiredService<TestDbContext>();
                     var user = await database.Authors.FirstOrDefaultAsync();
                     var client = httpClientFactory.CreateClient();
                     var response = await client.GetStringAsync("https://docs.microsoft.com/en-us/dotnet/core/");
                     var authorNameRes = AuthorName.CreateAuthorName(response);
 
-                    if (authorNameRes.IsFailure)
-                        throw new ArgumentException(authorNameRes.Error);
+                    if (authorNameRes.Failure)
+                        throw authorNameRes.Error;
 
                     user = user.UpdateName(authorNameRes.Value);
                     await database.SaveChangesAsync();

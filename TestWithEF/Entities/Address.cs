@@ -1,29 +1,26 @@
-﻿using Ardalis.GuardClauses;
-using CSharpFunctionalExtensions;
-using System.Numerics;
+﻿using TestWithEF.Models;
+using TestWithEF.ValueObjects;
 
 namespace TestWithEF.Entities
 {
-    public class Address:ValueObject
+    public class Address : ValueObject
     {
         private Address() { }
+
         public static Result<Address> CreateAddress(string street, string city, string postcode, string country)
         {
-            if (string.IsNullOrEmpty(street)) return Result.Failure<Address>("street  is empty");
-            if (string.IsNullOrEmpty(city)) return Result.Failure<Address>("city  is empty");
-            if (string.IsNullOrEmpty(postcode)) return Result.Failure<Address>("postcode  is empty");
-            if (string.IsNullOrEmpty(country)) return Result.Failure<Address>("country is empty");
-            return new Address()
-            {
-                Street = street,
-                City = city,
-                Postcode = postcode,
-                Country = country
-            };
-
+            return (street.NotEmpty(), city.NotEmpty(), postcode.NotEmpty(),
+                    country.NotEmpty())
+                .Apply((s, c, p, r) => new Address
+                {
+                    Street = s,
+                    City = c,
+                    Postcode = p,
+                    Country = r,
+                });
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<IComparable> GetEqualityComponents()
         {
             yield return Street;
             yield return City;
@@ -32,8 +29,11 @@ namespace TestWithEF.Entities
         }
 
         public string Street { get; private set; }
+
         public string City { get; private set; }
+
         public string Postcode { get; private set; }
+
         public string Country { get; private set; }
 
         public override string ToString()

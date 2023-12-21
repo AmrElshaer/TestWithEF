@@ -6,8 +6,6 @@ namespace TestWithEF.Repository
 {
     public class AuthorRepository : Repository<Author, Guid>, IAuthorRepository
     {
-        public AuthorRepository(TestContext dbContext) : base(dbContext)
-        {
-        }
+        public AuthorRepository(TestDbContext dbDbContext) : base(dbDbContext) { }
     }
 }

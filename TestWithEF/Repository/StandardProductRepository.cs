@@ -4,9 +4,7 @@ using TestWithEF.Repository.Base;
 
 namespace TestWithEF.Repository;
 
-public class StandardProductRepository: Repository<StandardProduct, Guid>, IStandardProductRepository
+public class StandardProductRepository : Repository<StandardProduct, Guid>, IStandardProductRepository
 {
-    public StandardProductRepository(TestContext dbContext): base(dbContext)
-    {
-    }
+    public StandardProductRepository(TestDbContext dbDbContext) : base(dbDbContext) { }
 }

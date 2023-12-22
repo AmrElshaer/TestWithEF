@@ -9,7 +9,7 @@ public class CreateProductEndPoint : IMinimalEndpoint
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
         builder.MapPost($"{EndpointConfig.BaseApiPath}/product", async (CreateProductVM request,
-                IProductRepository productRepository) =>
+                TestDbContext db) =>
             {
                 Entities.Product product = null;
                 if (request.ProductType is ProductType.Standard)
@@ -21,7 +21,8 @@ public class CreateProductEndPoint : IMinimalEndpoint
                     product = new FeaturedProduct(Guid.NewGuid(),request.Name, request.Start, request.End);
                 }
 
-                await productRepository.AddAsync(product);
+                await db.AddAsync(product);
+                await db.SaveChangesAsync();
                 return Results.Ok(product.Id);
             })
             .WithName("Create Product")

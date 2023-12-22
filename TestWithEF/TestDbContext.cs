@@ -22,6 +22,23 @@ namespace TestWithEF
                     s => GetOrderState(s)
                 );
 
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderProducts)
+                .WithOne()
+                .HasForeignKey(o => o.OrderId);
+
+            modelBuilder.Entity<OrderProduct>()
+                .HasOne<Product>()
+                .WithMany()
+                .HasForeignKey(op => op.ProductId);
+
+            modelBuilder.Entity<OrderProduct>()
+                .HasKey(o => new
+                {
+                    o.ProductId,
+                    o.OrderId
+                });
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthorConfiguration).Assembly);
         }
 

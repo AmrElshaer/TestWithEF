@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TestWithEF.Entities;
+using TestWithEF.Features.Orders.Commands.CreateOrder;
+using TestWithEF.Features.Orders.Queries.GetAllOrders;
 
 namespace TestWithEF.Controllers
 {
@@ -13,17 +14,7 @@ namespace TestWithEF.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Order> Get()
-        {
-            try
-            {
-                return _dbContext.Orders.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        public async Task<IReadOnlyList<GetAllOrdersDto>> Get() => await Mediator.Send(new GetAllOrdersQuery());
 
         [HttpPut("{id}/confirm")]
         public IActionResult Confirm(int id)
@@ -95,23 +86,14 @@ namespace TestWithEF.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Order order)
+        public async Task<IActionResult> Post([FromBody] CreateOrderCommand createOrderCommand)
         {
-            if (order == null)
-            {
-                return BadRequest();
-            }
-
-            order.State = new DraftState();
-            order.CreatedAt = DateTime.UtcNow;
-
-            _dbContext.Orders.Add(order);
-            _dbContext.SaveChanges();
+            var orderId = await Mediator.Send(createOrderCommand);
 
             return CreatedAtAction(nameof(Get), new
             {
-                id = order.Id
-            }, order);
+                id = orderId
+            }, createOrderCommand);
         }
     }
 }

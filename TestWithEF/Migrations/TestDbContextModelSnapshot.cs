@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TestWithEF;
 
@@ -12,15 +11,13 @@ using TestWithEF;
 namespace TestWithEF.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20230603112705_update_productStatus")]
-    partial class update_productStatus
+    partial class TestDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -31,20 +28,23 @@ namespace TestWithEF.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("TestWithEF.Entities.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CancelledAt")
                         .HasColumnType("datetime2");
@@ -67,6 +67,24 @@ namespace TestWithEF.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("TestWithEF.Entities.OrderProduct", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "OrderId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderProduct");
                 });
 
             modelBuilder.Entity("TestWithEF.Entities.Product", b =>
@@ -112,7 +130,7 @@ namespace TestWithEF.Migrations
 
             modelBuilder.Entity("TestWithEF.Entities.Author", b =>
                 {
-                    b.OwnsOne("TestWithEF.Entities.ContactDetails", "ContactDetails", b1 =>
+                    b.OwnsOne("TestWithEF.ValueObjects.ContactDetails", "ContactDetails", b1 =>
                         {
                             b1.Property<Guid>("AuthorId")
                                 .HasColumnType("uniqueidentifier");
@@ -158,6 +176,26 @@ namespace TestWithEF.Migrations
                         });
 
                     b.Navigation("ContactDetails");
+                });
+
+            modelBuilder.Entity("TestWithEF.Entities.OrderProduct", b =>
+                {
+                    b.HasOne("TestWithEF.Entities.Order", null)
+                        .WithMany("OrderProducts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TestWithEF.Entities.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TestWithEF.Entities.Order", b =>
+                {
+                    b.Navigation("OrderProducts");
                 });
 #pragma warning restore 612, 618
         }

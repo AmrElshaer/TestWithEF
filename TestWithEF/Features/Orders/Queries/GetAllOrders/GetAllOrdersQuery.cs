@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static TestWithEF.Features.Orders.Queries.GetAllOrders.GetAllOrdersDtoMapper;
 
 namespace TestWithEF.Features.Orders.Queries.GetAllOrders;
 
@@ -16,14 +17,6 @@ public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, IRead
 
     public async Task<IReadOnlyList<GetAllOrdersDto>> Handle(GetAllOrdersQuery request, CancellationToken cancellationToken)
     {
-        return await _db.Orders.Select(o => new GetAllOrdersDto()
-        {
-            Description = o.Description,
-            OrderProducts = o.OrderProducts.Select(op => new GetAllOrderProductDto()
-            {
-                ProductId = op.ProductId,
-                Quantity = op.Quantity,
-            })
-        }).ToListAsync(cancellationToken);
+        return await _db.Orders.Select(MapTo()).ToListAsync(cancellationToken);
     }
 }

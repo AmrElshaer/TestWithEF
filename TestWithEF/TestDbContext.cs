@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TestWithEF.Configurations;
 using TestWithEF.Entities;
+using TestWithEF.Features.Orders;
 
 namespace TestWithEF
 {
-    public class TestDbContext : DbContext
+    public partial class TestDbContext : DbContext
     {
         public DbSet<Author> Authors { get; set; }
-
-        public DbSet<Order> Orders { get; set; }
 
         public TestDbContext(DbContextOptions<TestDbContext> options)
             : base(options) { }

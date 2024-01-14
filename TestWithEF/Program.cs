@@ -8,9 +8,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Rebus.Config;
+using Rebus.Routing.TypeBased;
 using TestWithEF;
 using TestWithEF.Channels;
 using TestWithEF.EndPoints;
+using TestWithEF.Features.Orders.Commands.CreateOrder;
 using TestWithEF.Identity;
 using TestWithEF.IRepositories.Base;
 using TestWithEF.Models;
@@ -90,6 +94,52 @@ builder.Services.AddSingleton(Channel.CreateUnbounded<UserUpdatedChannel>());
 builder.Services.AddSingleton(Channel.CreateUnbounded<SendEmailChannel>());
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.ConfigureOptions<JwtOptionsSetup>();
+builder.Services.AddTransient<IWeatherService, WeatherService>();
+
+var basicCircuitBreakerPolicy = Policy
+    .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+    .CircuitBreakerAsync(2, TimeSpan.FromMilliseconds(120000));
+
+builder.Services.AddRebus(
+    rebus => rebus
+        .Routing(r =>
+            r.TypeBased().MapAssemblyOf<Program>("testwithef-queue"))
+        .Transport(t =>
+            t.UseRabbitMq(
+                builder.Configuration.GetConnectionString("amqp://guest:guest@localhost:5672"),
+                inputQueueName: "testwithef-queue"))
+        .Sagas(s =>
+            s.StoreInSqlServer(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                dataTableName: "Sagas",
+                indexTableName: "SagaIndexes")
+                
+            ),onCreated:
+    async bus =>
+    {
+        await bus.Subscribe<OrderConfirmationEmailSent>();
+        await bus.Subscribe<OrderPaymentRequestSent>();
+    }
+    //  you can using timeout to send event after amount of time like send follow updat after three week
+    // .Timeouts(t =>
+    //     t.StoreInSqlServer(
+    //         builder.Configuration.GetConnectionString("DefaultConnection"),
+    //         tableName: "Timeouts"))
+);
+
+builder.Services.AutoRegisterHandlersFromAssemblyOf<Program>();
+
+builder.Services.AddHttpClient<IWeatherService, WeatherService>(client =>
+    {
+        client.BaseAddress = new Uri("https://official-joke-api.appspot.com/random_joke");
+    })
+    .AddPolicyHandler(basicCircuitBreakerPolicy);
+
+builder.Services.AddHttpClient("TemperatureService", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:6001/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+}).AddPolicyHandler(basicCircuitBreakerPolicy);
 
 builder.Services.Scan(scan => scan
     .FromCallingAssembly()

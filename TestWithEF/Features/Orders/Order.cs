@@ -1,4 +1,6 @@
-﻿namespace TestWithEF.Entities
+﻿using TestWithEF.Entities;
+
+namespace TestWithEF.Features.Orders
 {
     public class Order : Entity
     {
@@ -15,6 +17,8 @@
         public DateTime? CancelledAt { get; private set; }
 
         public OrderState State { get; private set; }
+
+        public Guid AuthorId { get; private set; }
 
         public IReadOnlyCollection<OrderProduct> OrderProducts { get; private set; }
 
@@ -38,7 +42,7 @@
             ProcessedAt = processedAt;
         }
 
-        public static Order Create(string description, IReadOnlyList<OrderProduct> orderProducts)
+        public static Order Create(string description, IReadOnlyList<OrderProduct> orderProducts, Guid authorId)
         {
             return new Order()
             {
@@ -47,6 +51,7 @@
                 State = new DraftState(),
                 CreatedAt = DateTime.UtcNow,
                 OrderProducts = orderProducts.ToList(),
+                AuthorId = authorId,
             };
         }
     }

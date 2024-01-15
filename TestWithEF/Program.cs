@@ -22,6 +22,9 @@ using TestWithEF.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
+
+builder.Services.AddLogging(logging => logging.AddConsole());
+
 //builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddDbContext<TestDbContext>(options =>
@@ -105,21 +108,21 @@ builder.Services.AddRebus(
         .Routing(r =>
             r.TypeBased().MapAssemblyOf<Program>("testwithef-queue"))
         .Transport(t =>
-            t.UseRabbitMq(
-                builder.Configuration.GetConnectionString("amqp://guest:guest@localhost:5672"),
+            t.UseRabbitMq("amqp://guest:guest@localhost:5672",
                 inputQueueName: "testwithef-queue"))
         .Sagas(s =>
             s.StoreInSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection"),
                 dataTableName: "Sagas",
-                indexTableName: "SagaIndexes")
+                indexTableName: "SagaIndexes"))
                 
-            ),onCreated:
-    async bus =>
-    {
-        await bus.Subscribe<OrderConfirmationEmailSent>();
-        await bus.Subscribe<OrderPaymentRequestSent>();
-    }
+    //         ),onCreated:
+    // async bus =>
+    // {
+    //    // await bus.Subscribe<OrderCreatedEvent>();
+    //    // await bus.Subscribe<OrderConfirmationEmailSent>(); if you using publish== cheogra ,send orchi
+    //     //await bus.Subscribe<OrderPaymentRequestSent>();
+    // }
     //  you can using timeout to send event after amount of time like send follow updat after three week
     // .Timeouts(t =>
     //     t.StoreInSqlServer(

@@ -20,10 +20,10 @@ public record CreateOrderPaymentRequest(Guid OrderId);
 public sealed class SendOrderConfirmationEmailHandler
 : IHandleMessages<SendOrderConfirmationEmail>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<SendOrderConfirmationEmailHandler> _logger;
     private readonly IBus _bus;
 
-    public SendOrderConfirmationEmailHandler(ILogger logger,IBus bus)
+    public SendOrderConfirmationEmailHandler(ILogger<SendOrderConfirmationEmailHandler> logger,IBus bus)
     {
         _logger = logger;
         _bus = bus;
@@ -31,6 +31,7 @@ public sealed class SendOrderConfirmationEmailHandler
     public async Task Handle(SendOrderConfirmationEmail message)
     {
         _logger.LogInformation("Send confirmation {OrderId}",message.OrderId );
+
         await Task.Delay(2000);
         _logger.LogInformation("Order confirmation send {OrderId}",message.OrderId);
         await _bus.Reply(new OrderConfirmationEmailSent(message.OrderId));
@@ -39,10 +40,10 @@ public sealed class SendOrderConfirmationEmailHandler
 public sealed class CreateOrderPaymentRequestHandler
     : IHandleMessages<CreateOrderPaymentRequest>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<CreateOrderPaymentRequestHandler> _logger;
     private readonly IBus _bus;
 
-    public CreateOrderPaymentRequestHandler(ILogger logger,IBus bus)
+    public CreateOrderPaymentRequestHandler(ILogger<CreateOrderPaymentRequestHandler> logger,IBus bus)
     {
         _logger = logger;
         _bus = bus;
@@ -81,6 +82,7 @@ public class OrderCreateSaga:Saga<OrderCreateSagaData>,
     {
         _bus = bus;
     }
+    // if have muilt saga instance
     protected override void CorrelateMessages(ICorrelationConfig<OrderCreateSagaData> config)
     {
         config.Correlate<OrderCreatedEvent>(m=>m.OrderId

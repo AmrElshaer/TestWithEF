@@ -25,7 +25,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
 
         await _testDbContext.Orders.AddAsync(order, cancellationToken);
         await _testDbContext.SaveChangesAsync(cancellationToken);
-        await _bus.Publish(new OrderCreatedEvent(order.Id));
+        await _bus.Send(new OrderCreatedEvent(order.Id));
         return order.Id;
     }
 }

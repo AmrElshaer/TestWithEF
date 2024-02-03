@@ -9,6 +9,10 @@ namespace TestWithEF
     {
         public DbSet<Author> Authors { get; set; }
 
+        public DbSet<WarehouseLayoutGroup> WarehouseLayoutGroups { get; set; }
+
+        public DbSet<Subcategory> Subcategories { get; set; }
+
         public TestDbContext(DbContextOptions<TestDbContext> options)
             : base(options) { }
 

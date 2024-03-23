@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
-using Rebus.Config;
+// using Rebus.Config;
 using Rebus.Routing.TypeBased;
 using TestWithEF;
 using TestWithEF.Channels;
@@ -103,18 +103,18 @@ var basicCircuitBreakerPolicy = Policy
     .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
     .CircuitBreakerAsync(2, TimeSpan.FromMilliseconds(120000));
 
-builder.Services.AddRebus(
-    rebus => rebus
-        .Routing(r =>
-            r.TypeBased().MapAssemblyOf<Program>("testwithef-queue"))
-        .Transport(t =>
-            t.UseRabbitMq("amqp://guest:guest@localhost:5672",
-                inputQueueName: "testwithef-queue"))
-        .Sagas(s =>
-            s.StoreInSqlServer(
-                builder.Configuration.GetConnectionString("DefaultConnection"),
-                dataTableName: "Sagas",
-                indexTableName: "SagaIndexes"))
+// builder.Services.AddRebus(
+//     rebus => rebus
+//         .Routing(r =>
+//             r.TypeBased().MapAssemblyOf<Program>("testwithef-queue"))
+//         .Transport(t =>
+//             t.UseRabbitMq("amqp://guest:guest@localhost:5672",
+//                 inputQueueName: "testwithef-queue"))
+//         .Sagas(s =>
+//             s.StoreInSqlServer(
+//                 builder.Configuration.GetConnectionString("DefaultConnection"),
+//                 dataTableName: "Sagas",
+//                 indexTableName: "SagaIndexes"))
                 
     //         ),onCreated:
     // async bus =>
@@ -128,9 +128,9 @@ builder.Services.AddRebus(
     //     t.StoreInSqlServer(
     //         builder.Configuration.GetConnectionString("DefaultConnection"),
     //         tableName: "Timeouts"))
-);
+//);
 
-builder.Services.AutoRegisterHandlersFromAssemblyOf<Program>();
+//builder.Services.AutoRegisterHandlersFromAssemblyOf<Program>();
 
 builder.Services.AddHttpClient<IWeatherService, WeatherService>(client =>
     {

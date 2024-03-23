@@ -16,9 +16,17 @@ namespace TestWithEF.Controllers
         [HttpGet]
         public async Task<IReadOnlyList<GetAllOrdersDto>> Get() => await Mediator.Send(new GetAllOrdersQuery());
 
-        [HttpPut("{id}/confirm")]
-        public IActionResult Confirm(int id)
+        [HttpPut("{id:guid}/confirm")]
+        public IActionResult Confirm(Guid id)
         {
+            var ordersIds = new List<Guid>()
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+            };
+
+            var ordersTest = _dbContext.Orders.Where(a => ordersIds.Contains(a.Id))
+                .ToList();
             try
             {
                 var order = _dbContext.Orders.Find(id);
